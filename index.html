@@ -1,119 +1,74 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام الحضور التفاعلي</title>
-    <!-- تضمين مكتبة Tailwind CSS للتصميم الاحترافي المتوافق مع صفحتك -->
-    <script src="https://tailwindcss.com"></script>
+<meta charset="UTF-8">
+<title>نظام الحضور Firebase</title>
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
 
-    <div class="bg-white p-8 rounded-lg shadow-md max-w-xl w-full text-center border-t-4 border-blue-500">
-        <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center justify-center gap-2">
-            نظام تسجيل الحضور والاختبار 📊
-        </h2>
+<body>
 
-        <!-- حقل اسم الطالب -->
-        <div class="mb-6 text-right">
-            <label class="block text-slate-700 font-semibold mb-2">اسم الطالب:</label>
-            <input type="text" id="studentName" placeholder="اكتب اسمك الثلاثي هنا..." 
-                   class="w-full p-3 border border-slate-300 rounded-lg bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 text-right">
-        </div>
+<h2>تسجيل الحضور</h2>
 
-        <!-- سؤال الاختبار -->
-        <div class="bg-slate-50 p-4 rounded-lg mb-6 border border-slate-200 text-right">
-            <p class="font-bold text-slate-800 mb-4 text-lg">سؤال: معنى كلمة Blue ؟</p>
-            
-            <div class="space-y-3">
-                <label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-slate-100 rounded">
-                    <input type="radio" name="quiz" value="أزرق" class="w-5 h-5 text-blue-600">
-                    <span class="text-slate-700 font-medium">أزرق</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-slate-100 rounded">
-                    <input type="radio" name="quiz" value="أحمر" class="w-5 h-5 text-blue-600">
-                    <span class="text-slate-700 font-medium">أحمر</span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer p-2 hover:bg-slate-100 rounded">
-                    <input type="radio" name="quiz" value="أخضر" class="w-5 h-5 text-blue-600">
-                    <span class="text-slate-700 font-medium">أخضر</span>
-                </label>
-            </div>
-        </div>
+<input type="text" id="studentName" placeholder="اسم الطالب">
 
-        <!-- زر الإرسال -->
-        <button onclick="submitData()" 
-                class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200 shadow-md">
-            تسجيل الحضور وإرسال
-        </button>
+<p>سؤال: معنى Blue؟</p>
 
-        <!-- رسالة حالة الاتصال -->
-        <p id="msg" class="mt-4 font-bold text-lg text-slate-600"></p>
-    </div>
+<label><input type="radio" name="quiz" value="100"> أزرق</label><br>
+<label><input type="radio" name="quiz" value="0"> أحمر</label><br>
 
-    <!-- كود ربط Firebase المحدث الخاص بك -->
-    <script type="module">
-        import { initializeApp } from "https://gstatic.com";
-        import { getFirestore, collection, addDoc } from "https://gstatic.com";
+<button onclick="submitData()">تسجيل</button>
 
-        // إعدادات مشروعك الجديد spark-attendance
-        const firebaseConfig = {
-            apiKey: "AIzaSyAgi9oAxNdAD-LHVnC-pNbJ_AyHPn1azak",
-            authDomain: "://firebaseapp.com",
-            projectId: "spark-attendance",
-            storageBucket: "spark-attendance.firebasestorage.app",
-            messagingSenderId: "7353997849",
-            appId: "1:7353997849:web:ab2eb7bcdd65b78e9f6888"
-        };
+<p id="msg"></p>
 
-        // تهيئة Firebase و Firestore
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+<script type="module">
 
-        // دالة إرسال البيانات وقراءة المدخلات بشكل صحيح
-        window.submitData = async function() {
-            const nameInput = document.getElementById("studentName");
-            const name = nameInput ? nameInput.value.trim() : "";
-            const quizChecked = document.querySelector('input[name="quiz"]:checked');
-            const msgElement = document.getElementById("msg");
+// 1️⃣ Firebase imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-            if (!name || !quizChecked) {
-                alert("الرجاء كتابة الاسم واختيار الإجابة أولاً!");
-                return;
-            }
+// 2️⃣ Config (ضع بياناتك)
+const firebaseConfig = {
+  apiKey: "AIzaSyI9oAxNdAD-LHVnC-pNbJ_AyHPn1azak",
+  authDomain: "spark-attendance.firebaseapp.com",
+  projectId: "spark-attendance",
+  storageBucket: "spark-attendance.firebasestorage.app",
+  messagingSenderId: "7353997849",
+  appId: "1:7353997849:web:ab2eb7bcdd65b78e9f6888"
+};
 
-            msgElement.style.color = "orange";
-            msgElement.innerText = "⏳ جاري الإرسال للتسجيل...";
+// 3️⃣ Init Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-            // التحقق من صحة الإجابة
-            const isCorrect = (quizChecked.value === "أزرق");
-            const grade = isCorrect ? 100 : 0;
+// 4️⃣ Function
+window.submitData = async function(){
 
-            try {
-                // حفظ البيانات في Firestore داخل مجموعة attendance
-                await addDoc(collection(db, "attendance"), {
-                    name: name,
-                    answer: quizChecked.value,
-                    grade: grade,
-                    result: isCorrect ? "Success" : "Fail",
-                    attendance: "حاضر",
-                    time: new Date()
-                });
+  const name = document.getElementById("studentName").value;
+  const quiz = document.querySelector('input[name="quiz"]:checked');
 
-                msgElement.style.color = "green";
-                msgElement.innerText = "✅ تم تسجيل الحضور والدرجة بنجاح في Firebase!";
-                
-                // إعادة تعيين المدخلات بعد النجاح
-                nameInput.value = "";
-                quizChecked.checked = false;
+  if(!name || !quiz){
+    alert("اكتب الاسم واختر الإجابة");
+    return;
+  }
 
-            } catch (error) {
-                console.error("Firebase Error:", error);
-                msgElement.style.color = "red";
-                msgElement.innerText = "❌ حدث خطأ في الاتصال بقاعدة البيانات!";
-            }
-        }
-    </script>
+  try {
+    await addDoc(collection(db, "attendance"), {
+      name: name,
+      grade: Number(quiz.value),
+      result: Number(quiz.value) >= 50 ? "Success" : "Fail",
+      attendance: "حاضر",
+      time: new Date()
+    });
+
+    document.getElementById("msg").innerText = "✅ تم تسجيل الحضور بنجاح";
+
+  } catch (e) {
+    console.error(e);
+    document.getElementById("msg").innerText = "❌ حدث خطأ";
+  }
+}
+
+</script>
 
 </body>
 </html>
