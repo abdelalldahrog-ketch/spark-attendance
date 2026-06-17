@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام الحضور التفاعلي</title>
-    <!-- استدعاء أسلوب تنسيق مبسط شبيه بصفحتك الحالية تماماً -->
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,7 +17,7 @@
         }
         .title {
             font-size: 24px;
-            font-bold: true;
+            font-weight: bold;
             margin-bottom: 20px;
         }
         .input-field {
@@ -50,20 +49,21 @@
             font-size: 16px;
         }
     </style>
+
+    <!-- 1️⃣ تحميل مكتبات الـ Firebase المستقرة التي لا تسبب أخطاء CORS المتصفح -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
 </head>
 <body>
 
     <div class="container">
-        <!-- عنوان الصفحة والأيقونة الملونة -->
         <h2 class="title">نظام تسجيل الحضور والاختبار 📊</h2>
 
-        <!-- حقل اسم الطالب -->
         <div style="margin-bottom: 15px;">
             <label>اسم الطالب:</label>
-            <input type="text" id="studentName" placeholder="مصطفى عبد العال دحروج" class="input-field">
+            <input type="text" id="studentName" placeholder="اكتب اسمك هنا..." class="input-field">
         </div>
 
-        <!-- سؤال الاختبار المكتوب في صفحتك -->
         <div class="quiz-box">
             <p>سؤال: معنى كلمة Blue ؟</p>
             <div class="radio-group">
@@ -73,19 +73,14 @@
             </div>
         </div>
 
-        <!-- الزر مع إضافة المعرّف id لضمان الضغط بنجاح -->
-        <button id="btnSubmit" class="btn-submit">تسجيل الحضور وإرسال</button>
+        <!-- 2️⃣ ربط الزر مباشرة بالدالة لتجنب خطأ is not defined -->
+        <button onclick="submitData()" class="btn-submit">تسجيل الحضور وإرسال</button>
 
-        <!-- مكان ظهور رسالة النجاح أو التحميل -->
         <p id="msg"></p>
     </div>
 
-    <!-- كود ربط وتشغيل السيرفر وقاعدة البيانات Firestore -->
-    <script type="module">
-        import { initializeApp } from "https://gstatic.com";
-        import { getFirestore, collection, addDoc } from "https://gstatic.com";
-
-        // إعدادات مشروعك الحالي المفتوح أمامك في الصورة spark-attendance
+    <script>
+        // إعدادات مشروعك الحالي المفتوح لديك spark-attendance
         const firebaseConfig = {
             apiKey: "AIzaSyAgi9oAxNdAD-LHVnC-pNbJ_AyHPn1azak",
             authDomain: "://firebaseapp.com",
@@ -95,12 +90,12 @@
             appId: "1:7353997849:web:ab2eb7bcdd65b78e9f6888"
         };
 
-        // تهيئة النظام
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // 3️⃣ تهيئة نظام الفايربيس بالطريقة المتوافقة
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        // دالة الإرسال وحفظ البيانات
-        async function sendAttendanceData() {
+        // 4️⃣ دالة الإرسال الرئيسية والمطابقة للزر
+        async function submitData() {
             const nameInput = document.getElementById("studentName");
             const name = nameInput ? nameInput.value.trim() : "";
             const quizChecked = document.querySelector('input[name="quiz"]:checked');
@@ -114,37 +109,33 @@
             msgElement.style.color = "blue";
             msgElement.innerText = "⏳ جاري الإرسال والتسجيل في Firebase...";
 
-            // التحقق من صحة الإجابة (أزرق) لجمع الدرجات
             const isCorrect = (quizChecked.value === "أزرق");
             const grade = isCorrect ? 100 : 0;
 
             try {
                 // إرسال البيانات مباشرة إلى جدول Cloud Firestore
-                await addDoc(collection(db, "attendance"), {
+                await db.collection("attendance").add({
                     name: name,
                     answer: quizChecked.value,
                     grade: grade,
                     result: isCorrect ? "Success" : "Fail",
                     attendance: "حاضر",
-                    time: new Date()
+                    time: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 msgElement.style.color = "green";
                 msgElement.innerText = "✅ تم تسجيل الحضور والدرجة بنجاح في السيرفر!";
                 
-                // تفريغ الحقول تلقائياً لتسهيل تسجيل الطالب التالي
+                // تفريغ الحقول تلقائياً
                 nameInput.value = "";
                 quizChecked.checked = false;
 
             } catch (error) {
                 console.error("Firebase Error:", error);
                 msgElement.style.color = "red";
-                msgElement.innerText = "❌ حدث خطأ في الاتصال بقاعدة البيانات!";
+                msgElement.innerText = "❌ حدث خطأ أثناء الاتصال بقاعدة البيانات!";
             }
         }
-
-        // الربط المباشر والأكيد لحدث الضغط على الزر
-        document.getElementById("btnSubmit").addEventListener("click", sendAttendanceData);
     </script>
 
 </body>
